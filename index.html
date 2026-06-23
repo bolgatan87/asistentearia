@@ -2,498 +2,459 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>ARIA — Secretaria Virtual</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --bg:        #0D0F14;
-    --surface:   #141720;
-    --card:      #1C2030;
-    --border:    #252A3A;
-    --accent:    #7C6EF5;
-    --accent2:   #B8ACFF;
-    --gold:      #F0C060;
-    --green:     #4ADE80;
-    --red:       #F87171;
-    --text:      #E8EAF0;
-    --muted:     #6B7280;
-    --radius:    14px;
-  }
+:root {
+  --bg:      #0D0F14;
+  --surface: #141720;
+  --card:    #1C2030;
+  --border:  #252A3A;
+  --accent:  #7C6EF5;
+  --accent2: #B8ACFF;
+  --gold:    #F0C060;
+  --green:   #4ADE80;
+  --red:     #F87171;
+  --text:    #E8EAF0;
+  --muted:   #6B7280;
+  --nav-h:   60px;
+  --top-h:   54px;
+  --safe-b:  env(safe-area-inset-bottom, 0px);
+}
 
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    overflow: hidden;
-  }
+html { height: 100%; }
+body {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  /* no overflow:hidden — let the browser handle it */
+  display: flex;
+  flex-direction: column;
+}
 
-  /* ── LAYOUT ── */
-  .shell {
-    display: grid;
-    grid-template-columns: 260px 1fr;
-    grid-template-rows: 56px 1fr;
-    height: 100vh;
-  }
+/* ── APP SHELL ── */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  height: 100dvh; /* dynamic viewport height — critical on mobile Chrome */
+  overflow: hidden;
+}
 
-  /* ── TOPBAR ── */
-  .topbar {
-    grid-column: 1 / -1;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    padding: 0 20px;
-    gap: 14px;
-  }
-  .topbar-logo {
-    font-family: 'DM Serif Display', serif;
-    font-size: 22px;
-    color: var(--accent2);
-    letter-spacing: -0.5px;
-  }
-  .topbar-logo span { color: var(--gold); font-style: italic; }
-  .topbar-status {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 11px;
-    color: var(--muted);
-    margin-left: auto;
-  }
-  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+/* ── TOPBAR ── */
+.topbar {
+  flex-shrink: 0;
+  height: var(--top-h);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+  gap: 10px;
+  z-index: 10;
+}
+.topbar-logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 22px;
+  color: var(--accent2);
+}
+.topbar-logo em { color: var(--gold); font-style: italic; }
+.topbar-sub { font-size: 11px; color: var(--muted); }
+.online-dot {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--muted);
+}
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: blink 2s infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 
-  /* ── SIDEBAR ── */
-  .sidebar {
+/* ── PAGE CONTENT ── */
+.pages {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+.page {
+  position: absolute; inset: 0;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+}
+.page.active { display: flex; }
+
+/* ── BOTTOM NAV ── */
+.bottom-nav {
+  flex-shrink: 0;
+  height: calc(var(--nav-h) + var(--safe-b));
+  padding-bottom: var(--safe-b);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  z-index: 10;
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: 'Inter', sans-serif;
+  font-size: 10px;
+  cursor: pointer;
+  padding: 6px 0;
+  transition: color .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item .nav-icon { font-size: 22px; line-height: 1; }
+.nav-item.active { color: var(--accent2); }
+
+/* ── CHAT PAGE ── */
+#page-chat { background: var(--bg); }
+
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 14px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.msg {
+  display: flex;
+  gap: 8px;
+  max-width: 88%;
+  animation: fadeUp .2s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.msg.user { align-self: flex-end; flex-direction: row-reverse; }
+.msg-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; flex-shrink: 0; margin-top: 2px;
+}
+.msg.aria .msg-avatar { background: var(--accent); }
+.msg.user .msg-avatar { background: var(--card); border: 1px solid var(--border); }
+.msg-bubble {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 10px 14px;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+.msg.aria .msg-bubble  { border-top-left-radius: 4px; }
+.msg.user .msg-bubble  { background: var(--accent); border-color: var(--accent); color: #fff; border-top-right-radius: 4px; }
+.msg-time { font-size: 10px; color: var(--muted); margin-top: 3px; padding: 0 4px; }
+
+.typing-indicator { display: flex; gap: 4px; align-items: center; }
+.typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: tdot .8s infinite; }
+.typing-dot:nth-child(2) { animation-delay: .15s; }
+.typing-dot:nth-child(3) { animation-delay: .3s; }
+@keyframes tdot { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+
+/* ── INPUT BAR — always visible, sticks to bottom of page ── */
+.input-bar {
+  flex-shrink: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 10px 12px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+.input-bar textarea {
+  flex: 1;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 22px;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  padding: 10px 16px;
+  resize: none;
+  outline: none;
+  line-height: 1.4;
+  max-height: 110px;
+  min-height: 44px;
+  transition: border-color .2s;
+  -webkit-appearance: none;
+}
+.input-bar textarea:focus { border-color: var(--accent); }
+.input-bar textarea::placeholder { color: var(--muted); }
+
+.ib-btn {
+  width: 44px; height: 44px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  transition: transform .1s, opacity .15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.ib-btn:active { transform: scale(.9); }
+.btn-mic  { background: var(--card); border: 1.5px solid var(--border); }
+.btn-mic.recording { background: var(--red); border-color: var(--red); animation: blink .8s infinite; }
+.btn-send { background: var(--accent); }
+
+/* ── GENERIC PAGE HEADER ── */
+.page-header {
+  flex-shrink: 0;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.page-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; }
+.btn-add {
+  background: var(--accent); color: #fff;
+  border: none; padding: 8px 16px;
+  border-radius: 20px; font-size: 13px;
+  cursor: pointer; display: flex; align-items: center; gap: 5px;
+}
+
+/* ── AGENDA ── */
+.scroll-area {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.agenda-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 14px;
+}
+.agenda-card.done { opacity: .45; }
+.a-date { font-size: 11px; color: var(--accent2); font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+.a-title { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+.a-desc  { font-size: 13px; color: var(--muted); line-height: 1.45; }
+.a-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+.tag { font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: 500; }
+.tag.work     { background:#1e3a5f; color:#60a5fa; }
+.tag.personal { background:#1a3a1a; color:#4ade80; }
+.tag.meeting  { background:#2a1a3a; color:#c084fc; }
+.tag.urgent   { background:#3a1a1a; color:#f87171; }
+.a-actions { display: flex; gap: 8px; }
+.a-actions button { background:none; border:none; font-size:18px; cursor:pointer; opacity:.6; }
+.a-actions button:active { opacity:1; }
+
+/* ── TASKS ── */
+.task-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 13px 14px;
+  display: flex; align-items: center; gap: 12px;
+}
+.task-item.done .task-title { text-decoration: line-through; opacity: .4; }
+.task-check {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid var(--border);
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 13px; transition: all .15s;
+}
+.task-item.done .task-check { background: var(--green); border-color: var(--green); }
+.task-title { flex: 1; font-size: 14.5px; }
+.task-meta  { font-size: 11px; color: var(--muted); }
+.task-del   { background:none; border:none; cursor:pointer; font-size:17px; opacity:.5; }
+.task-del:active { opacity:1; }
+
+/* ── MEMORY PAGE ── */
+.mem-page-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.memory-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+}
+.mem-key  { font-size: 11px; color: var(--accent2); font-weight: 600; margin-bottom: 2px; }
+.mem-val  { font-size: 13.5px; color: var(--text); }
+.mem-del  { background:none; border:none; font-size:20px; cursor:pointer; color:var(--muted); flex-shrink:0; }
+.mem-del:active { color: var(--red); }
+.mem-empty { color:var(--muted); font-size:13px; padding:20px 14px; line-height:1.6; }
+
+/* ── MODAL ── */
+.modal-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.75); backdrop-filter: blur(4px);
+  z-index: 200; align-items: flex-end; justify-content: center;
+  padding-bottom: var(--safe-b);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px 20px 0 0;
+  padding: 20px 20px calc(20px + var(--safe-b));
+  width: 100%;
+  max-width: 520px;
+  animation: slideUp .25s ease;
+}
+@keyframes slideUp { from{transform:translateY(60px);opacity:0} to{transform:none;opacity:1} }
+.modal-handle { width:40px; height:4px; background:var(--border); border-radius:2px; margin:0 auto 16px; }
+.modal h3 { font-family:'DM Serif Display',serif; font-size:18px; margin-bottom:16px; }
+.field { margin-bottom:14px; }
+.field label { display:block; font-size:11px; color:var(--muted); margin-bottom:5px; letter-spacing:.5px; text-transform:uppercase; }
+.field input, .field textarea, .field select {
+  width:100%; background:var(--bg);
+  border:1.5px solid var(--border); border-radius:10px;
+  color:var(--text); font-family:'Inter',sans-serif;
+  font-size:15px; padding:10px 12px; outline:none;
+  -webkit-appearance:none;
+}
+.field input:focus,.field textarea:focus,.field select:focus { border-color:var(--accent); }
+.field textarea { resize:vertical; min-height:80px; }
+.field select option { background:var(--card); }
+.modal-actions { display:flex; gap:10px; margin-top:20px; }
+.btn-cancel  { flex:1; background:var(--bg); border:1px solid var(--border); color:var(--muted); padding:12px; border-radius:10px; font-size:14px; cursor:pointer; }
+.btn-confirm { flex:2; background:var(--accent); color:#fff; border:none; padding:12px; border-radius:10px; font-size:14px; cursor:pointer; font-weight:500; }
+
+/* ── DESKTOP tweaks ── */
+@media (min-width: 640px) {
+  .bottom-nav { display: none; }
+  .app { flex-direction: row; flex-wrap: wrap; }
+  .topbar { width: 100%; }
+  .pages { flex: 1; }
+
+  /* show a permanent left sidebar */
+  .desktop-sidebar {
+    display: flex !important;
+    width: 220px;
+    flex-shrink: 0;
+    flex-direction: column;
     background: var(--surface);
     border-right: 1px solid var(--border);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    overflow-y: auto;
+    padding: 14px 10px;
+    gap: 4px;
   }
-  .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
-  .sidebar-label {
-    font-size: 10px;
-    font-weight: 600;
-    letter-spacing: 1.2px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 10px;
-  }
-  .nav-btn {
-    width: 100%;
-    background: none;
-    border: none;
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    text-align: left;
+  .desktop-sidebar .ds-btn {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px;
+    background: none; border: none;
+    color: var(--text); font-family:'Inter',sans-serif;
+    font-size: 13px; cursor: pointer; text-align: left;
     transition: background .15s;
   }
-  .nav-btn:hover { background: var(--card); }
-  .nav-btn.active { background: var(--accent); color: #fff; }
-  .nav-icon { font-size: 16px; width: 20px; text-align: center; }
+  .desktop-sidebar .ds-btn:hover { background: var(--card); }
+  .desktop-sidebar .ds-btn.active { background: var(--accent); color: #fff; }
+  .desktop-sidebar .ds-icon { font-size:18px; width:22px; text-align:center; }
 
-  .memory-list { flex: 1; overflow-y: auto; padding: 12px; }
-  .memory-item {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 10px;
-    margin-bottom: 6px;
-    font-size: 11px;
-    color: var(--muted);
-    position: relative;
-    cursor: pointer;
-    transition: border-color .15s;
-  }
-  .memory-item:hover { border-color: var(--accent); }
-  .memory-item .mem-key { color: var(--accent2); font-weight: 500; font-size: 10px; }
-  .memory-item .mem-del {
-    position: absolute; top: 6px; right: 8px;
-    background: none; border: none; color: var(--muted);
-    cursor: pointer; font-size: 13px;
-  }
-  .memory-item .mem-del:hover { color: var(--red); }
-
-  /* ── MAIN ── */
-  .main {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  /* ── VIEWS ── */
-  .view { display: none; flex-direction: column; flex: 1; overflow: hidden; }
-  .view.active { display: flex; }
-
-  /* ── CHAT VIEW ── */
-  .chat-messages {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-  }
-  .chat-messages::-webkit-scrollbar { width: 4px; }
-  .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-  .msg {
-    display: flex;
-    gap: 10px;
-    max-width: 80%;
-    animation: fadeUp .25s ease;
-  }
-  @keyframes fadeUp { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
-  .msg-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 14px; flex-shrink: 0;
-  }
-  .msg.aria .msg-avatar { background: var(--accent); }
-  .msg.user .msg-avatar { background: var(--card); border: 1px solid var(--border); }
-  .msg-bubble {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 10px 14px;
-    font-size: 13.5px;
-    line-height: 1.55;
-  }
-  .msg.user .msg-bubble { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .msg.aria .msg-bubble { border-radius: 4px 12px 12px 12px; }
-  .msg.user .msg-bubble { border-radius: 12px 4px 12px 12px; }
-  .msg-time { font-size: 10px; color: var(--muted); margin-top: 4px; }
-
-  .typing-indicator { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
-  .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); animation: bounce .8s infinite; }
-  .typing-dot:nth-child(2) { animation-delay: .15s; }
-  .typing-dot:nth-child(3) { animation-delay: .3s; }
-  @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
-
-  /* ── INPUT AREA ── */
-  .input-area {
-    padding: 14px 20px;
-    border-top: 1px solid var(--border);
-    background: var(--surface);
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-  }
-  .input-wrap { flex: 1; position: relative; }
-  #chat-input {
-    width: 100%;
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    color: var(--text);
-    font-family: 'Inter', sans-serif;
-    font-size: 13.5px;
-    padding: 11px 14px;
-    resize: none;
-    outline: none;
-    transition: border-color .2s;
-    max-height: 120px;
-    min-height: 44px;
-  }
-  #chat-input:focus { border-color: var(--accent); }
-  #chat-input::placeholder { color: var(--muted); }
-
-  .btn-icon {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-    transition: all .15s;
-    flex-shrink: 0;
-  }
-  .btn-send { background: var(--accent); color: #fff; }
-  .btn-send:hover { background: var(--accent2); color: var(--bg); }
-  .btn-mic { background: var(--card); border: 1px solid var(--border); color: var(--text); }
-  .btn-mic:hover { border-color: var(--accent); color: var(--accent); }
-  .btn-mic.recording { background: var(--red); border-color: var(--red); color: #fff; animation: pulse 1s infinite; }
-
-  /* ── AGENDA VIEW ── */
-  .agenda-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .agenda-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; }
-  .btn-add {
-    background: var(--accent);
-    color: #fff;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    transition: opacity .15s;
-  }
-  .btn-add:hover { opacity: .85; }
-  .agenda-grid {
-    flex: 1; overflow-y: auto; padding: 16px 20px;
-    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-    gap: 12px; align-content: start;
-  }
-  .agenda-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px;
-    cursor: pointer;
-    transition: border-color .15s, transform .15s;
-  }
-  .agenda-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-  .agenda-card.done { opacity: .5; }
-  .agenda-card .a-date {
-    font-size: 10px; color: var(--accent2);
-    font-family: 'JetBrains Mono', monospace;
-    margin-bottom: 6px;
-  }
-  .agenda-card .a-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-  .agenda-card .a-desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
-  .agenda-card .a-footer {
-    display: flex; justify-content: space-between; align-items: center;
-    margin-top: 10px;
-  }
-  .tag {
-    font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 500;
-  }
-  .tag.work { background: #1e3a5f; color: #60a5fa; }
-  .tag.personal { background: #1a3a1a; color: #4ade80; }
-  .tag.urgent { background: #3a1a1a; color: #f87171; }
-  .tag.meeting { background: #2a1a3a; color: #c084fc; }
-  .a-actions { display: flex; gap: 6px; }
-  .a-actions button {
-    background: none; border: none; cursor: pointer;
-    font-size: 14px; opacity: .5; transition: opacity .15s;
-  }
-  .a-actions button:hover { opacity: 1; }
-
-  /* ── TASKS VIEW ── */
-  .tasks-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .tasks-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; }
-  .tasks-list { flex: 1; overflow-y: auto; padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; }
-  .task-item {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 12px 14px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: border-color .15s;
-  }
-  .task-item:hover { border-color: var(--border); }
-  .task-item.done .task-title { text-decoration: line-through; opacity: .4; }
-  .task-check {
-    width: 20px; height: 20px; border-radius: 50%;
-    border: 2px solid var(--border);
-    cursor: pointer; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center;
-    transition: all .15s;
-  }
-  .task-check:hover { border-color: var(--accent); }
-  .task-item.done .task-check { background: var(--green); border-color: var(--green); }
-  .task-title { flex: 1; font-size: 13.5px; }
-  .task-meta { font-size: 11px; color: var(--muted); font-family: 'JetBrains Mono', monospace; }
-  .task-del { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 14px; }
-  .task-del:hover { color: var(--red); }
-
-  /* ── NOTES VIEW ── */
-  .notes-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .notes-header h2 { font-family: 'DM Serif Display', serif; font-size: 20px; }
-  .notes-layout { flex: 1; display: grid; grid-template-columns: 220px 1fr; overflow: hidden; }
-  .notes-list { border-right: 1px solid var(--border); overflow-y: auto; padding: 10px; }
-  .note-item {
-    padding: 10px; border-radius: 8px; cursor: pointer;
-    margin-bottom: 4px; transition: background .15s;
-  }
-  .note-item:hover { background: var(--card); }
-  .note-item.active { background: var(--accent); }
-  .note-item .n-title { font-size: 12px; font-weight: 500; }
-  .note-item .n-preview { font-size: 11px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .note-item.active .n-preview { color: rgba(255,255,255,.6); }
-  .note-editor { display: flex; flex-direction: column; overflow: hidden; }
-  #note-title-input {
-    background: none; border: none; border-bottom: 1px solid var(--border);
-    color: var(--text); font-family: 'DM Serif Display', serif;
-    font-size: 20px; padding: 14px 20px; outline: none;
-  }
-  #note-body-input {
-    flex: 1; background: none; border: none;
-    color: var(--text); font-family: 'Inter', sans-serif;
-    font-size: 13.5px; line-height: 1.7; padding: 16px 20px;
-    outline: none; resize: none;
-  }
-
-  /* ── MODAL ── */
-  .modal-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(0,0,0,.7); backdrop-filter: blur(4px);
-    z-index: 100; align-items: center; justify-content: center;
-  }
-  .modal-overlay.open { display: flex; }
-  .modal {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 24px;
-    width: 400px;
-    max-width: 90vw;
-  }
-  .modal h3 { font-family: 'DM Serif Display', serif; font-size: 18px; margin-bottom: 16px; }
-  .field { margin-bottom: 14px; }
-  .field label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; letter-spacing: .5px; }
-  .field input, .field textarea, .field select {
-    width: 100%; background: var(--bg);
-    border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text); font-family: 'Inter', sans-serif;
-    font-size: 13px; padding: 9px 12px; outline: none;
-    transition: border-color .15s;
-  }
-  .field input:focus, .field textarea:focus, .field select:focus { border-color: var(--accent); }
-  .field textarea { resize: vertical; min-height: 80px; }
-  .field select option { background: var(--card); }
-  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px; }
-  .btn-cancel { background: none; border: 1px solid var(--border); color: var(--muted); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-  .btn-confirm { background: var(--accent); color: #fff; border: none; padding: 8px 18px; border-radius: 8px; cursor: pointer; font-size: 13px; }
-
-  /* ── SCROLLBAR global ── */
-  ::-webkit-scrollbar { width: 4px; height: 4px; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+  .modal-overlay { align-items: center; padding-bottom: 0; }
+  .modal { border-radius: 16px; padding: 24px; max-width: 440px; }
+}
+@media (min-width: 640px) {
+  .desktop-sidebar { display: flex; }
+}
+.desktop-sidebar { display: none; }
 </style>
 </head>
 <body>
-<div class="shell">
+<div class="app">
 
   <!-- TOPBAR -->
   <header class="topbar">
-    <div class="topbar-logo">ARIA<span>.</span></div>
-    <span style="font-size:11px;color:var(--muted);margin-left:4px;">Asistente de Inteligencia Real Integrada</span>
-    <div class="topbar-status">
-      <div class="dot"></div>
-      En línea · IA activa
-    </div>
+    <div class="topbar-logo">ARIA<em>.</em></div>
+    <span class="topbar-sub" id="view-label">Chat</span>
+    <div class="online-dot"><div class="dot"></div> En línea</div>
   </header>
 
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="sidebar-section">
-      <div class="sidebar-label">Navegación</div>
-      <button class="nav-btn active" onclick="switchView('chat')">
-        <span class="nav-icon">💬</span> Hablar con ARIA
-      </button>
-      <button class="nav-btn" onclick="switchView('agenda')">
-        <span class="nav-icon">📅</span> Agenda
-      </button>
-      <button class="nav-btn" onclick="switchView('tasks')">
-        <span class="nav-icon">✅</span> Tareas
-      </button>
-      <button class="nav-btn" onclick="switchView('notes')">
-        <span class="nav-icon">📝</span> Notas
-      </button>
-    </div>
-    <div class="sidebar-section" style="flex:1;overflow:hidden;display:flex;flex-direction:column;">
-      <div class="sidebar-label">Memoria de ARIA</div>
-      <div id="memory-list" class="memory-list"></div>
-    </div>
-    <div class="sidebar-section" style="border-top:1px solid var(--border);border-bottom:none;">
-      <button class="nav-btn" onclick="clearMemory()" style="color:var(--red)">
-        <span class="nav-icon">🗑️</span> Limpiar memoria
-      </button>
-    </div>
-  </aside>
+  <!-- DESKTOP SIDEBAR -->
+  <nav class="desktop-sidebar" id="desktop-sidebar">
+    <button class="ds-btn active" onclick="switchPage('chat',this)"><span class="ds-icon">💬</span> Chat</button>
+    <button class="ds-btn" onclick="switchPage('agenda',this)"><span class="ds-icon">📅</span> Agenda</button>
+    <button class="ds-btn" onclick="switchPage('tasks',this)"><span class="ds-icon">✅</span> Tareas</button>
+    <button class="ds-btn" onclick="switchPage('memory',this)"><span class="ds-icon">🧠</span> Memoria</button>
+  </nav>
 
-  <!-- MAIN -->
-  <main class="main">
+  <!-- PAGES -->
+  <div class="pages">
 
-    <!-- CHAT VIEW -->
-    <div id="view-chat" class="view active">
-      <div id="chat-messages" class="chat-messages">
-        <div class="msg aria">
-          <div class="msg-avatar">🤖</div>
-          <div>
-            <div class="msg-bubble">¡Hola! Soy <strong>ARIA</strong>, tu secretaria virtual. Puedo ayudarte a gestionar tu agenda, crear tareas, tomar notas y mucho más.<br><br>Puedes hablarme por texto o usando el micrófono 🎤. ¿Qué necesitas hoy?</div>
-            <div class="msg-time">Ahora</div>
-          </div>
-        </div>
-      </div>
-      <div class="input-area">
-        <button class="btn-icon btn-mic" id="btn-mic" onclick="toggleVoice()" title="Hablar por voz">🎤</button>
-        <div class="input-wrap">
-          <textarea id="chat-input" placeholder="Escríbeme algo... o usa el micrófono 🎤" rows="1"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
-            oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
-        </div>
-        <button class="btn-icon btn-send" onclick="sendMessage()" title="Enviar">➤</button>
+    <!-- CHAT -->
+    <div class="page active" id="page-chat">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="input-bar">
+        <button class="ib-btn btn-mic" id="btn-mic" onclick="toggleVoice()" title="Voz">🎤</button>
+        <textarea id="chat-input" placeholder="Escríbeme o usa el micrófono…" rows="1"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage()}"
+          oninput="autoResize(this)"></textarea>
+        <button class="ib-btn btn-send" onclick="sendMessage()" title="Enviar">➤</button>
       </div>
     </div>
 
-    <!-- AGENDA VIEW -->
-    <div id="view-agenda" class="view">
-      <div class="agenda-header">
+    <!-- AGENDA -->
+    <div class="page" id="page-agenda">
+      <div class="page-header">
         <h2>📅 Agenda</h2>
-        <button class="btn-add" onclick="openAgendaModal()">+ Nuevo evento</button>
+        <button class="btn-add" onclick="openAgendaModal()">+ Evento</button>
       </div>
-      <div class="agenda-grid" id="agenda-grid"></div>
+      <div class="scroll-area" id="agenda-list"></div>
     </div>
 
-    <!-- TASKS VIEW -->
-    <div id="view-tasks" class="view">
-      <div class="tasks-header">
+    <!-- TASKS -->
+    <div class="page" id="page-tasks">
+      <div class="page-header">
         <h2>✅ Tareas</h2>
-        <button class="btn-add" onclick="openTaskModal()">+ Nueva tarea</button>
+        <button class="btn-add" onclick="openTaskModal()">+ Tarea</button>
       </div>
-      <div class="tasks-list" id="tasks-list"></div>
+      <div class="scroll-area" id="tasks-list"></div>
     </div>
 
-    <!-- NOTES VIEW -->
-    <div id="view-notes" class="view">
-      <div class="notes-header">
-        <h2>📝 Notas</h2>
-        <button class="btn-add" onclick="newNote()">+ Nueva nota</button>
+    <!-- MEMORY -->
+    <div class="page" id="page-memory">
+      <div class="page-header">
+        <h2>🧠 Memoria de ARIA</h2>
+        <button class="btn-add" style="background:var(--red)" onclick="clearMemory()">Limpiar</button>
       </div>
-      <div class="notes-layout">
-        <div class="notes-list" id="notes-list"></div>
-        <div class="note-editor">
-          <input id="note-title-input" placeholder="Título de la nota..." oninput="saveCurrentNote()">
-          <textarea id="note-body-input" placeholder="Escribe aquí tu nota..." oninput="saveCurrentNote()"></textarea>
-        </div>
-      </div>
+      <div class="mem-page-list" id="mem-page-list"></div>
     </div>
 
-  </main>
+  </div>
+
+  <!-- BOTTOM NAV (mobile only) -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchPage('chat',this)" data-page="chat">
+      <span class="nav-icon">💬</span>Chat
+    </button>
+    <button class="nav-item" onclick="switchPage('agenda',this)" data-page="agenda">
+      <span class="nav-icon">📅</span>Agenda
+    </button>
+    <button class="nav-item" onclick="switchPage('tasks',this)" data-page="tasks">
+      <span class="nav-icon">✅</span>Tareas
+    </button>
+    <button class="nav-item" onclick="switchPage('memory',this)" data-page="memory">
+      <span class="nav-icon">🧠</span>Memoria
+    </button>
+  </nav>
 </div>
 
 <!-- MODAL AGENDA -->
-<div class="modal-overlay" id="agenda-modal">
+<div class="modal-overlay" id="agenda-modal" onclick="if(event.target===this)closeModal('agenda-modal')">
   <div class="modal">
+    <div class="modal-handle"></div>
     <h3>📅 Nuevo Evento</h3>
-    <div class="field"><label>TÍTULO</label><input id="a-title" placeholder="Reunión con cliente..."></div>
-    <div class="field"><label>FECHA Y HORA</label><input id="a-date" type="datetime-local"></div>
-    <div class="field"><label>DESCRIPCIÓN</label><textarea id="a-desc" placeholder="Detalles del evento..."></textarea></div>
+    <div class="field"><label>Título</label><input id="a-title" placeholder="Reunión con cliente..."></div>
+    <div class="field"><label>Fecha y hora</label><input id="a-date" type="datetime-local"></div>
+    <div class="field"><label>Descripción</label><textarea id="a-desc" placeholder="Detalles..."></textarea></div>
     <div class="field">
-      <label>CATEGORÍA</label>
+      <label>Categoría</label>
       <select id="a-cat">
         <option value="work">💼 Trabajo</option>
         <option value="personal">🌿 Personal</option>
@@ -508,12 +469,13 @@
   </div>
 </div>
 
-<!-- MODAL TASK -->
-<div class="modal-overlay" id="task-modal">
+<!-- MODAL TAREA -->
+<div class="modal-overlay" id="task-modal" onclick="if(event.target===this)closeModal('task-modal')">
   <div class="modal">
+    <div class="modal-handle"></div>
     <h3>✅ Nueva Tarea</h3>
-    <div class="field"><label>TAREA</label><input id="t-title" placeholder="Llamar al proveedor..."></div>
-    <div class="field"><label>FECHA LÍMITE (opcional)</label><input id="t-due" type="date"></div>
+    <div class="field"><label>Tarea</label><input id="t-title" placeholder="Llamar al proveedor..."></div>
+    <div class="field"><label>Fecha límite (opcional)</label><input id="t-due" type="date"></div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('task-modal')">Cancelar</button>
       <button class="btn-confirm" onclick="saveTask()">Guardar</button>
@@ -522,427 +484,222 @@
 </div>
 
 <script>
-// ─────────────────────────────────────────────
-// STATE
-// ─────────────────────────────────────────────
-const API_URL = "https://api.anthropic.com/v1/messages";
-
-let state = {
-  memory: JSON.parse(localStorage.getItem('aria_memory') || '{}'),
-  agenda: JSON.parse(localStorage.getItem('aria_agenda') || '[]'),
-  tasks:  JSON.parse(localStorage.getItem('aria_tasks')  || '[]'),
-  notes:  JSON.parse(localStorage.getItem('aria_notes')  || '[]'),
-  chatHistory: [],
-  currentNote: null,
+// ── STATE ──
+const API = "https://api.anthropic.com/v1/messages";
+const state = {
+  memory: JSON.parse(localStorage.getItem('aria_memory')||'{}'),
+  agenda: JSON.parse(localStorage.getItem('aria_agenda')||'[]'),
+  tasks:  JSON.parse(localStorage.getItem('aria_tasks') ||'[]'),
+  chat:   [],
 };
-
 function save() {
   localStorage.setItem('aria_memory', JSON.stringify(state.memory));
   localStorage.setItem('aria_agenda', JSON.stringify(state.agenda));
   localStorage.setItem('aria_tasks',  JSON.stringify(state.tasks));
-  localStorage.setItem('aria_notes',  JSON.stringify(state.notes));
 }
 
-// ─────────────────────────────────────────────
-// VIEW SWITCHING
-// ─────────────────────────────────────────────
-function switchView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b => {
-    if (b.textContent.toLowerCase().includes(name === 'chat' ? 'hablar' : name === 'agenda' ? 'agenda' : name === 'tasks' ? 'tarea' : 'nota')) {
-      b.classList.add('active');
+// ── NAVIGATION ──
+const pageLabels = { chat:'Chat', agenda:'Agenda', tasks:'Tareas', memory:'Memoria' };
+function switchPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item, .ds-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  // also sync the other nav
+  document.querySelectorAll(`[data-page="${name}"], .ds-btn`).forEach(b => {
+    if (b.textContent.trim().toLowerCase().startsWith(pageLabels[name].toLowerCase().charAt(0))) {
+      // rough match — handled above
     }
   });
-  if (name === 'agenda') renderAgenda();
-  if (name === 'tasks')  renderTasks();
-  if (name === 'notes')  renderNotes();
+  document.getElementById('view-label').textContent = pageLabels[name];
+  if (name==='agenda') renderAgenda();
+  if (name==='tasks')  renderTasks();
+  if (name==='memory') renderMemoryPage();
 }
 
-// ─────────────────────────────────────────────
-// CHAT
-// ─────────────────────────────────────────────
-function timeStr() {
-  return new Date().toLocaleTimeString('es', { hour: '2-digit', minute: '2-digit' });
-}
+// ── CHAT ──
+function ts() { return new Date().toLocaleTimeString('es',{hour:'2-digit',minute:'2-digit'}); }
 
-function appendMsg(role, text) {
+function appendMsg(role, html) {
   const wrap = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  const avatar = role === 'aria' ? '🤖' : '👤';
-  div.innerHTML = `
-    <div class="msg-avatar">${avatar}</div>
-    <div>
-      <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>
-      <div class="msg-time">${timeStr()}</div>
-    </div>`;
-  wrap.appendChild(div);
+  const d = document.createElement('div');
+  d.className = 'msg '+role;
+  const av = role==='aria'?'🤖':'👤';
+  const avBg = role==='aria'?'':'';
+  d.innerHTML = `<div class="msg-avatar">${av}</div><div><div class="msg-bubble">${html}</div><div class="msg-time">${ts()}</div></div>`;
+  wrap.appendChild(d);
   wrap.scrollTop = wrap.scrollHeight;
 }
 
 function showTyping() {
   const wrap = document.getElementById('chat-messages');
-  const div = document.createElement('div');
-  div.className = 'msg aria'; div.id = 'typing-msg';
-  div.innerHTML = `
-    <div class="msg-avatar">🤖</div>
-    <div>
-      <div class="msg-bubble">
-        <div class="typing-indicator">
-          <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
-        </div>
-      </div>
-    </div>`;
-  wrap.appendChild(div);
+  const d = document.createElement('div');
+  d.className='msg aria'; d.id='typing';
+  d.innerHTML=`<div class="msg-avatar">🤖</div><div><div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div></div>`;
+  wrap.appendChild(d);
   wrap.scrollTop = wrap.scrollHeight;
 }
+function hideTyping() { const t=document.getElementById('typing'); if(t)t.remove(); }
 
-function removeTyping() {
-  const t = document.getElementById('typing-msg');
-  if (t) t.remove();
+function autoResize(el) {
+  el.style.height='auto';
+  el.style.height=Math.min(el.scrollHeight,110)+'px';
 }
 
 async function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  input.style.height = 'auto';
-
-  appendMsg('user', text);
-  state.chatHistory.push({ role: 'user', content: text });
-
+  const inp = document.getElementById('chat-input');
+  const txt = inp.value.trim(); if(!txt) return;
+  inp.value=''; inp.style.height='auto';
+  appendMsg('user', escHtml(txt));
+  state.chat.push({role:'user',content:txt});
   showTyping();
 
-  // Build system prompt with full context
-  const now = new Date().toLocaleString('es', { dateStyle: 'full', timeStyle: 'short' });
-  const memStr = Object.entries(state.memory).map(([k,v]) => `• ${k}: ${v}`).join('\n') || 'Sin datos aún.';
-  const agendaStr = state.agenda.slice(-5).map(e => `• [${e.date}] ${e.title}: ${e.desc}`).join('\n') || 'Vacía.';
-  const tasksStr = state.tasks.filter(t=>!t.done).slice(-5).map(t=>`• ${t.title}${t.due?' (vence: '+t.due+')':''}`).join('\n') || 'Sin tareas pendientes.';
+  const now = new Date().toLocaleString('es',{dateStyle:'full',timeStyle:'short'});
+  const mem = Object.entries(state.memory).map(([k,v])=>`• ${k}: ${v}`).join('\n')||'Sin datos.';
+  const ag  = state.agenda.slice(-5).map(e=>`• [${e.date||'?'}] ${e.title}`).join('\n')||'Vacía.';
+  const tk  = state.tasks.filter(t=>!t.done).slice(-5).map(t=>`• ${t.title}`).join('\n')||'Sin pendientes.';
 
-  const systemPrompt = `Eres ARIA, una secretaria virtual inteligente, eficiente y cálida. Hablas siempre en español.
-Fecha y hora actual: ${now}
+  const sys = `Eres ARIA, secretaria virtual inteligente, cálida y eficiente. Siempre hablas en español.
+Fecha/hora: ${now}
 
-MEMORIA ACUMULADA DEL USUARIO:
-${memStr}
+MEMORIA DEL USUARIO:
+${mem}
 
-PRÓXIMOS EVENTOS EN AGENDA:
-${agendaStr}
+AGENDA PRÓXIMA:
+${ag}
 
 TAREAS PENDIENTES:
-${tasksStr}
+${tk}
 
-INSTRUCCIONES CLAVE:
-1. Si el usuario te dice algo personal (nombre, empresa, preferencias, contactos), guárdalo emitiendo al final de tu respuesta una línea con formato JSON así: MEMORIA:{"clave":"valor"}
-2. Si pides agregar algo a la agenda, emite: AGENDA:{"title":"...","date":"YYYY-MM-DDTHH:MM","desc":"...","cat":"work|personal|meeting|urgent"}
-3. Si pides agregar una tarea, emite: TAREA:{"title":"...","due":"YYYY-MM-DD"}
-4. Si pides agregar una nota, emite: NOTA:{"title":"...","body":"..."}
-5. Sé proactiva: recuerda eventos próximos, sugiere organizar tareas, ofrece ayuda concreta.
-6. Responde de forma natural, breve y útil. No menciones los comandos internos al usuario.`;
+REGLAS DE SALIDA:
+- Si el usuario menciona datos personales, guárdalos emitiendo al FINAL de tu respuesta: MEMORIA:{"clave":"valor"}
+- Si piden evento en agenda: AGENDA:{"title":"...","date":"YYYY-MM-DDTHH:MM","desc":"...","cat":"work|personal|meeting|urgent"}
+- Si piden tarea: TAREA:{"title":"...","due":"YYYY-MM-DD"}
+- Responde natural, útil y breve. No menciones los comandos al usuario.`;
 
   try {
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        system: systemPrompt,
-        messages: state.chatHistory.slice(-12),
-      })
+    const res = await fetch(API, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-6', max_tokens:1000, system:sys, messages:state.chat.slice(-12) })
     });
-    const data = await response.json();
-    const reply = data.content?.[0]?.text || 'Lo siento, hubo un problema con la respuesta.';
+    const data = await res.json();
+    let reply = data.content?.[0]?.text || '⚠️ Sin respuesta.';
+    let display = reply;
 
-    // Parse commands
-    let displayReply = reply;
+    // Parse MEMORIA
+    const mM = reply.match(/MEMORIA:(\{[^}]+\})/);
+    if (mM) { try { Object.assign(state.memory, JSON.parse(mM[1])); save(); } catch(e){} display=display.replace(/MEMORIA:\{[^}]+\}/,'').trim(); }
 
-    const memMatch = reply.match(/MEMORIA:(\{[^}]+\})/);
-    if (memMatch) {
-      try {
-        const mem = JSON.parse(memMatch[1]);
-        Object.assign(state.memory, mem);
-        save(); renderMemory();
-      } catch(e){}
-      displayReply = displayReply.replace(/MEMORIA:\{[^}]+\}/, '').trim();
-    }
+    // Parse AGENDA
+    const mA = reply.match(/AGENDA:(\{[^}]+\})/);
+    if (mA) { try { state.agenda.push({id:Date.now(),...JSON.parse(mA[1]),done:false}); save(); display=display.replace(/AGENDA:\{[^}]+\}/,'').trim()+'\n\n📅 ¡Evento añadido a tu agenda!'; } catch(e){} }
 
-    const agMatch = reply.match(/AGENDA:(\{[^}]+\})/);
-    if (agMatch) {
-      try {
-        const ev = JSON.parse(agMatch[1]);
-        state.agenda.push({ id: Date.now(), ...ev, done: false });
-        save();
-        displayReply = displayReply.replace(/AGENDA:\{[^}]+\}/, '').trim();
-        displayReply += '\n\n📅 ¡Evento añadido a tu agenda!';
-      } catch(e){}
-    }
+    // Parse TAREA
+    const mT = reply.match(/TAREA:(\{[^}]+\})/);
+    if (mT) { try { state.tasks.push({id:Date.now(),...JSON.parse(mT[1]),done:false}); save(); display=display.replace(/TAREA:\{[^}]+\}/,'').trim()+'\n\n✅ ¡Tarea añadida!'; } catch(e){} }
 
-    const taskMatch = reply.match(/TAREA:(\{[^}]+\})/);
-    if (taskMatch) {
-      try {
-        const tk = JSON.parse(taskMatch[1]);
-        state.tasks.push({ id: Date.now(), ...tk, done: false });
-        save();
-        displayReply = displayReply.replace(/TAREA:\{[^}]+\}/, '').trim();
-        displayReply += '\n\n✅ ¡Tarea añadida a tu lista!';
-      } catch(e){}
-    }
-
-    const noteMatch = reply.match(/NOTA:(\{[^}]+\})/s);
-    if (noteMatch) {
-      try {
-        const no = JSON.parse(noteMatch[1]);
-        state.notes.unshift({ id: Date.now(), ...no });
-        save();
-        displayReply = displayReply.replace(/NOTA:\{[^}]+\}/s, '').trim();
-        displayReply += '\n\n📝 ¡Nota guardada!';
-      } catch(e){}
-    }
-
-    removeTyping();
-    appendMsg('aria', displayReply.trim());
-    state.chatHistory.push({ role: 'assistant', content: reply });
-
-  } catch (err) {
-    removeTyping();
-    appendMsg('aria', '⚠️ No pude conectarme. Revisa tu conexión e intenta de nuevo.');
+    hideTyping();
+    appendMsg('aria', escHtml(display.trim()).replace(/\n/g,'<br>'));
+    state.chat.push({role:'assistant',content:reply});
+  } catch(e) {
+    hideTyping();
+    appendMsg('aria','⚠️ Error de conexión. Intenta de nuevo.');
   }
 }
 
-// ─────────────────────────────────────────────
-// VOICE
-// ─────────────────────────────────────────────
-let recognition = null;
-let isRecording = false;
+function escHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 
+// ── VOICE ──
+let rec=null, recording=false;
 function toggleVoice() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    alert('Tu navegador no soporta reconocimiento de voz. Usa Chrome.');
-    return;
-  }
-  if (isRecording) {
-    recognition.stop();
-    return;
-  }
-  recognition = new SpeechRecognition();
-  recognition.lang = 'es-ES';
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  const btn = document.getElementById('btn-mic');
-  const input = document.getElementById('chat-input');
-
-  recognition.onstart = () => {
-    isRecording = true;
-    btn.classList.add('recording');
-    btn.textContent = '⏹️';
-  };
-  recognition.onresult = (e) => {
-    const transcript = Array.from(e.results).map(r => r[0].transcript).join('');
-    input.value = transcript;
-    input.style.height = 'auto';
-    input.style.height = Math.min(input.scrollHeight, 120) + 'px';
-  };
-  recognition.onend = () => {
-    isRecording = false;
-    btn.classList.remove('recording');
-    btn.textContent = '🎤';
-    if (input.value.trim()) sendMessage();
-  };
-  recognition.onerror = () => {
-    isRecording = false;
-    btn.classList.remove('recording');
-    btn.textContent = '🎤';
-  };
-  recognition.start();
+  const SR = window.SpeechRecognition||window.webkitSpeechRecognition;
+  if (!SR) { alert('Usa Chrome para reconocimiento de voz.'); return; }
+  const btn=document.getElementById('btn-mic'), inp=document.getElementById('chat-input');
+  if (recording) { rec.stop(); return; }
+  rec = new SR();
+  rec.lang='es-ES'; rec.continuous=false; rec.interimResults=true;
+  rec.onstart=()=>{ recording=true; btn.classList.add('recording'); btn.textContent='⏹️'; };
+  rec.onresult=e=>{ inp.value=Array.from(e.results).map(r=>r[0].transcript).join(''); autoResize(inp); };
+  rec.onend=()=>{ recording=false; btn.classList.remove('recording'); btn.textContent='🎤'; if(inp.value.trim()) sendMessage(); };
+  rec.onerror=()=>{ recording=false; btn.classList.remove('recording'); btn.textContent='🎤'; };
+  rec.start();
 }
 
-// ─────────────────────────────────────────────
-// MEMORY
-// ─────────────────────────────────────────────
-function renderMemory() {
-  const list = document.getElementById('memory-list');
-  list.innerHTML = '';
-  const entries = Object.entries(state.memory);
-  if (!entries.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:4px;">ARIA aprenderá sobre ti a medida que hablen.</div>';
-    return;
-  }
-  entries.forEach(([k, v]) => {
-    const div = document.createElement('div');
-    div.className = 'memory-item';
-    div.innerHTML = `<div class="mem-key">${k}</div><div>${v}</div>
-      <button class="mem-del" onclick="delMemory('${k}')">×</button>`;
-    list.appendChild(div);
-  });
-}
-function delMemory(k) { delete state.memory[k]; save(); renderMemory(); }
-function clearMemory() {
-  if (confirm('¿Borrar toda la memoria de ARIA?')) {
-    state.memory = {}; save(); renderMemory();
-  }
-}
-
-// ─────────────────────────────────────────────
-// AGENDA
-// ─────────────────────────────────────────────
-const catLabels = { work: '💼 Trabajo', personal: '🌿 Personal', meeting: '🎯 Reunión', urgent: '🚨 Urgente' };
-
+// ── AGENDA ──
+const catLabel = {work:'💼 Trabajo',personal:'🌿 Personal',meeting:'🎯 Reunión',urgent:'🚨 Urgente'};
 function renderAgenda() {
-  const grid = document.getElementById('agenda-grid');
-  grid.innerHTML = '';
-  const sorted = [...state.agenda].sort((a,b) => new Date(a.date) - new Date(b.date));
-  if (!sorted.length) {
-    grid.innerHTML = '<div style="color:var(--muted);padding:20px;">Sin eventos. ¡Añade uno o pídeselo a ARIA!</div>';
-    return;
-  }
-  sorted.forEach(ev => {
-    const div = document.createElement('div');
-    div.className = `agenda-card${ev.done?' done':''}`;
-    const d = ev.date ? new Date(ev.date).toLocaleString('es',{dateStyle:'medium',timeStyle:'short'}) : '—';
-    div.innerHTML = `
+  const el=document.getElementById('agenda-list');
+  const sorted=[...state.agenda].sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(!sorted.length){el.innerHTML='<div style="color:var(--muted);padding:10px">Sin eventos aún. ¡Dile a ARIA que agende algo!</div>';return;}
+  el.innerHTML=sorted.map(ev=>{
+    const d=ev.date?new Date(ev.date).toLocaleString('es',{dateStyle:'medium',timeStyle:'short'}):'—';
+    return `<div class="agenda-card${ev.done?' done':''}">
       <div class="a-date">🗓 ${d}</div>
-      <div class="a-title">${ev.title}</div>
-      <div class="a-desc">${ev.desc||''}</div>
+      <div class="a-title">${escHtml(ev.title)}</div>
+      ${ev.desc?`<div class="a-desc">${escHtml(ev.desc)}</div>`:''}
       <div class="a-footer">
-        <span class="tag ${ev.cat||'work'}">${catLabels[ev.cat]||'💼 Trabajo'}</span>
+        <span class="tag ${ev.cat||'work'}">${catLabel[ev.cat]||'💼'}</span>
         <div class="a-actions">
-          <button onclick="toggleAgendaDone(${ev.id})" title="${ev.done?'Marcar pendiente':'Completar'}">${ev.done?'↩️':'✅'}</button>
-          <button onclick="delAgenda(${ev.id})" title="Eliminar">🗑️</button>
+          <button onclick="toggleAgenda(${ev.id})">${ev.done?'↩️':'✅'}</button>
+          <button onclick="delAgenda(${ev.id})">🗑️</button>
         </div>
-      </div>`;
-    grid.appendChild(div);
-  });
+      </div>
+    </div>`;
+  }).join('');
 }
-function openAgendaModal() {
-  const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-  document.getElementById('a-date').value = now.toISOString().slice(0,16);
-  document.getElementById('a-modal-id') && (document.getElementById('a-modal-id').value = '');
-  document.getElementById('a-title').value = '';
-  document.getElementById('a-desc').value = '';
+function openAgendaModal(){
+  const now=new Date(); now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  document.getElementById('a-date').value=now.toISOString().slice(0,16);
+  document.getElementById('a-title').value='';
+  document.getElementById('a-desc').value='';
   document.getElementById('agenda-modal').classList.add('open');
 }
-function saveAgendaItem() {
-  const title = document.getElementById('a-title').value.trim();
-  if (!title) return;
-  state.agenda.push({
-    id: Date.now(),
-    title,
-    date: document.getElementById('a-date').value,
-    desc: document.getElementById('a-desc').value.trim(),
-    cat:  document.getElementById('a-cat').value,
-    done: false,
-  });
+function saveAgendaItem(){
+  const t=document.getElementById('a-title').value.trim(); if(!t) return;
+  state.agenda.push({id:Date.now(),title:t,date:document.getElementById('a-date').value,desc:document.getElementById('a-desc').value.trim(),cat:document.getElementById('a-cat').value,done:false});
   save(); closeModal('agenda-modal'); renderAgenda();
 }
-function toggleAgendaDone(id) {
-  const ev = state.agenda.find(e=>e.id===id);
-  if (ev) { ev.done = !ev.done; save(); renderAgenda(); }
-}
-function delAgenda(id) {
-  state.agenda = state.agenda.filter(e=>e.id!==id); save(); renderAgenda();
-}
+function toggleAgenda(id){ const e=state.agenda.find(e=>e.id===id); if(e){e.done=!e.done;save();renderAgenda();} }
+function delAgenda(id){ state.agenda=state.agenda.filter(e=>e.id!==id); save(); renderAgenda(); }
 
-// ─────────────────────────────────────────────
-// TASKS
-// ─────────────────────────────────────────────
-function renderTasks() {
-  const list = document.getElementById('tasks-list');
-  list.innerHTML = '';
-  if (!state.tasks.length) {
-    list.innerHTML = '<div style="color:var(--muted);padding:20px;">Sin tareas. ¡Pídeselas a ARIA o añade una!</div>';
-    return;
-  }
-  const pending = state.tasks.filter(t=>!t.done);
-  const done    = state.tasks.filter(t=>t.done);
-  [...pending, ...done].forEach(t => {
-    const div = document.createElement('div');
-    div.className = `task-item${t.done?' done':''}`;
-    div.innerHTML = `
-      <div class="task-check" onclick="toggleTask(${t.id})">${t.done?'✓':''}</div>
-      <div class="task-title">${t.title}</div>
-      ${t.due ? `<div class="task-meta">${t.due}</div>` : ''}
-      <button class="task-del" onclick="delTask(${t.id})">🗑️</button>`;
-    list.appendChild(div);
-  });
+// ── TASKS ──
+function renderTasks(){
+  const el=document.getElementById('tasks-list');
+  if(!state.tasks.length){el.innerHTML='<div style="color:var(--muted);padding:10px">Sin tareas. ¡Dile a ARIA o añade una!</div>';return;}
+  const all=[...state.tasks.filter(t=>!t.done),...state.tasks.filter(t=>t.done)];
+  el.innerHTML=all.map(t=>`<div class="task-item${t.done?' done':''}">
+    <div class="task-check" onclick="toggleTask(${t.id})">${t.done?'✓':''}</div>
+    <div class="task-title">${escHtml(t.title)}</div>
+    ${t.due?`<div class="task-meta">${t.due}</div>`:''}
+    <button class="task-del" onclick="delTask(${t.id})">🗑️</button>
+  </div>`).join('');
 }
-function openTaskModal() {
-  document.getElementById('t-title').value = '';
-  document.getElementById('t-due').value = '';
-  document.getElementById('task-modal').classList.add('open');
-}
-function saveTask() {
-  const title = document.getElementById('t-title').value.trim();
-  if (!title) return;
-  state.tasks.push({ id: Date.now(), title, due: document.getElementById('t-due').value, done: false });
-  save(); closeModal('task-modal'); renderTasks();
-}
-function toggleTask(id) {
-  const t = state.tasks.find(t=>t.id===id);
-  if (t) { t.done = !t.done; save(); renderTasks(); }
-}
-function delTask(id) {
-  state.tasks = state.tasks.filter(t=>t.id!==id); save(); renderTasks();
-}
+function openTaskModal(){ document.getElementById('t-title').value=''; document.getElementById('t-due').value=''; document.getElementById('task-modal').classList.add('open'); }
+function saveTask(){ const t=document.getElementById('t-title').value.trim(); if(!t) return; state.tasks.push({id:Date.now(),title:t,due:document.getElementById('t-due').value,done:false}); save(); closeModal('task-modal'); renderTasks(); }
+function toggleTask(id){ const t=state.tasks.find(t=>t.id===id); if(t){t.done=!t.done;save();renderTasks();} }
+function delTask(id){ state.tasks=state.tasks.filter(t=>t.id!==id); save(); renderTasks(); }
 
-// ─────────────────────────────────────────────
-// NOTES
-// ─────────────────────────────────────────────
-function renderNotes() {
-  const list = document.getElementById('notes-list');
-  list.innerHTML = '';
-  if (!state.notes.length) {
-    list.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:10px;">Sin notas aún.</div>';
-    return;
-  }
-  state.notes.forEach(n => {
-    const div = document.createElement('div');
-    div.className = `note-item${state.currentNote===n.id?' active':''}`;
-    div.onclick = () => loadNote(n.id);
-    div.innerHTML = `<div class="n-title">${n.title||'Sin título'}</div><div class="n-preview">${n.body||''}</div>`;
-    list.appendChild(div);
-  });
+// ── MEMORY PAGE ──
+function renderMemoryPage(){
+  const el=document.getElementById('mem-page-list');
+  const entries=Object.entries(state.memory);
+  if(!entries.length){el.innerHTML='<div class="mem-empty">ARIA aprenderá sobre ti automáticamente mientras hablas con ella.<br><br>Por ejemplo, dile:<br>• "Me llamo Juan"<br>• "Mi empresa es CML Locaciones"<br>• "Mi número es 311 555 0000"</div>';return;}
+  el.innerHTML=entries.map(([k,v])=>`<div class="memory-item">
+    <div><div class="mem-key">${escHtml(k)}</div><div class="mem-val">${escHtml(v)}</div></div>
+    <button class="mem-del" onclick="delMem('${k}')">×</button>
+  </div>`).join('');
 }
-function newNote() {
-  const n = { id: Date.now(), title: '', body: '' };
-  state.notes.unshift(n);
-  state.currentNote = n.id;
-  save(); renderNotes();
-  document.getElementById('note-title-input').value = '';
-  document.getElementById('note-body-input').value = '';
-  document.getElementById('note-title-input').focus();
-}
-function loadNote(id) {
-  const n = state.notes.find(n=>n.id===id);
-  if (!n) return;
-  state.currentNote = id;
-  document.getElementById('note-title-input').value = n.title;
-  document.getElementById('note-body-input').value = n.body;
-  renderNotes();
-}
-function saveCurrentNote() {
-  const n = state.notes.find(n=>n.id===state.currentNote);
-  if (!n) return;
-  n.title = document.getElementById('note-title-input').value;
-  n.body  = document.getElementById('note-body-input').value;
-  save(); renderNotes();
-}
+function delMem(k){ delete state.memory[k]; save(); renderMemoryPage(); }
+function clearMemory(){ if(confirm('¿Borrar toda la memoria de ARIA?')){ state.memory={}; save(); renderMemoryPage(); } }
 
-// ─────────────────────────────────────────────
-// MODAL
-// ─────────────────────────────────────────────
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-document.querySelectorAll('.modal-overlay').forEach(m => {
-  m.addEventListener('click', e => { if (e.target === m) m.classList.remove('open'); });
-});
+// ── MODAL ──
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 
-// ─────────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────────
-renderMemory();
+// ── INIT ──
+appendMsg('aria', '¡Hola! Soy <strong>ARIA</strong>, tu secretaria virtual 🤖<br>Puedes escribirme o usar el <strong>🎤 micrófono</strong>.<br>Cuéntame, ¿en qué te ayudo hoy?');
 </script>
 </body>
 </html>
